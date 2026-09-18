@@ -1,0 +1,5 @@
+node_modules/
+
+# Data runtime aplikasi (dibuat otomatis saat server pertama kali jalan)
+data.json
+backup/
