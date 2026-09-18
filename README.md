@@ -26,3 +26,9 @@ node server.js
 Lalu buka `http://localhost:3000` di browser. Staff lain di jaringan yang sama bisa membuka alamat IP yang ditampilkan di terminal.
 
 Di Windows, cukup klik dua kali `JALANKAN-WINDOWS.bat`.
+
+## Deploy ke Vercel
+
+Repo ini juga bisa di-deploy sebagai situs statis ke Vercel (`vercel.json` sudah disiapkan). Setelah deploy, aplikasi otomatis berjalan dalam **mode Browser saja** — data tersimpan di `localStorage` browser tiap orang, tidak dibagi antar staff.
+
+Ini karena `server.js` (yang menyimpan data ke `data.json` dan membagikannya ke semua staff via LAN) memakai proses Node.js yang jalan terus-menerus dan menulis ke file lokal — arsitektur ini **tidak didukung oleh hosting serverless** seperti Vercel (filesystem-nya bersifat sementara, tidak ada proses yang nyala terus). Untuk mode data yang benar-benar dibagi ke semua staff, tetap jalankan `node server.js` di satu komputer/jaringan lokal seperti dijelaskan di atas.
