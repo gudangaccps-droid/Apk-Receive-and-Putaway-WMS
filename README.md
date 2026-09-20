@@ -1,34 +1,100 @@
-# Apk-Receive-and-Putaway-WMS
+# WMS Gudang ACC
 
-Aplikasi **Label Dus Gudang** — untuk proses *Receiving* (penerimaan barang) dan *Putaway* (penyusunan barang ke rak) di gudang ACC PS.
+Warehouse Management System untuk mengelola operasional Gudang Aksesoris Partshop.
 
-Aplikasi ini berjalan lokal (tanpa internet), berbasis browser + server Node.js ringan tanpa dependency eksternal.
+## Tujuan Sistem
 
-## Fitur
+Membangun sistem gudang berbasis data:
 
-- **Input & Daftar** — catat setiap dus/label barang masuk (tanggal terima, supplier, No GRN/SJ, SKU, nama barang, varian, PIC, qty, lokasi, zona, status), dengan pencarian & filter.
-- **Putaway (FIFO)** — daftar dus yang belum disusun, diurutkan FIFO (stok tertua per SKU diprioritaskan), mendukung penyusunan sebagian (partial putaway) dengan qty & lokasi rak tujuan.
-- **Riwayat Disusun** — riwayat tiap transaksi penyusunan per label, termasuk yang baru tersusun sebagian.
-- **Cetak Label** — cetak label dus siap tempel lengkap dengan barcode (CODE128), 8 label per lembar A4.
-- **Export / Import Excel** — backup dan pemulihan data lewat file Excel.
-- **Mode Server Lokal** — data dibagikan ke semua staff di jaringan/WiFi yang sama lewat server lokal; kalau server tidak aktif, otomatis memakai `localStorage` di browser masing-masing.
+- Mengetahui lokasi setiap barang
+- Mengurangi kesalahan picking
+- Mempercepat pencarian barang
+- Meningkatkan akurasi stok
+- Membuat aktivitas gudang dapat dimonitor
 
-## Cara menjalankan
+## Prinsip Sistem
 
-Lihat panduan lengkap di [CARA-PAKAI.md](CARA-PAKAI.md).
+"Barang harus ditemukan berdasarkan data, bukan berdasarkan ingatan manusia."
 
-Ringkas:
+## Teknologi
 
-```bash
-node server.js
+Frontend:
+- React (Vite)
+
+Backend:
+- Node.js + Express
+
+Database:
+- PostgreSQL
+
+## Modul
+
+| # | Modul | Status |
+|---|---|---|
+| 1 | Master Data | **Development** |
+| 2 | Receiving & Putaway | Planned |
+| 3 | Inventory Management | Planned |
+| 4 | Picking | Planned |
+| 5 | Cycle Count | Planned |
+| 6 | Dashboard | Planned |
+
+Skema database untuk Modul 2-5 sudah disiapkan di `backend/db/migrations/001_init.sql` supaya pengembangan modul berikutnya tinggal dilanjutkan di atas fondasi yang sama; API dan UI-nya baru tersedia untuk Modul 1 (Master Data).
+
+## Struktur Proyek
+
+```
+backend/    API Express (REST) + skema & migrasi PostgreSQL
+frontend/   Aplikasi React (Vite)
+docker-compose.yml   Menjalankan database + backend + frontend sekaligus
 ```
 
-Lalu buka `http://localhost:3000` di browser. Staff lain di jaringan yang sama bisa membuka alamat IP yang ditampilkan di terminal.
+## Menjalankan secara lokal
 
-Di Windows, cukup klik dua kali `JALANKAN-WINDOWS.bat`.
+### Opsi 1 — Docker Compose (disarankan)
 
-## Deploy ke Vercel
+```bash
+docker compose up --build
+```
 
-Repo ini juga bisa di-deploy sebagai situs statis ke Vercel (`vercel.json` sudah disiapkan). Setelah deploy, aplikasi otomatis berjalan dalam **mode Browser saja** — data tersimpan di `localStorage` browser tiap orang, tidak dibagi antar staff.
+- Frontend: http://localhost:5173
+- Backend API: http://localhost:4000/api
+- Database: PostgreSQL di port 5432 (kredensial di `docker-compose.yml`)
 
-Ini karena `server.js` (yang menyimpan data ke `data.json` dan membagikannya ke semua staff via LAN) memakai proses Node.js yang jalan terus-menerus dan menulis ke file lokal — arsitektur ini **tidak didukung oleh hosting serverless** seperti Vercel (filesystem-nya bersifat sementara, tidak ada proses yang nyala terus). Untuk mode data yang benar-benar dibagi ke semua staff, tetap jalankan `node server.js` di satu komputer/jaringan lokal seperti dijelaskan di atas.
+Migrasi & seed database berjalan otomatis saat container backend pertama kali start.
+
+### Opsi 2 — Manual (tanpa Docker)
+
+Butuh Node.js 20+ dan PostgreSQL yang sudah jalan.
+
+**Backend:**
+
+```bash
+cd backend
+cp .env.example .env   # sesuaikan DATABASE_URL bila perlu
+npm install
+npm run migrate        # membuat skema tabel
+npm run seed           # data awal (satuan & zona default)
+npm run dev
+```
+
+**Frontend** (di terminal terpisah):
+
+```bash
+cd frontend
+cp .env.example .env
+npm install
+npm run dev
+```
+
+Buka http://localhost:5173 di browser.
+
+## Modul 1: Master Data
+
+Sudah bisa dipakai untuk mengelola:
+
+- **Produk / SKU** — kode, nama, varian, kategori, satuan, barcode, stok minimum
+- **Lokasi Rak** — kode lokasi, zona, rak, level, bin
+- **Kategori** barang
+- **Satuan (UOM)** — mis. PCS, BOX, DUS
+- **Supplier**
+- **Zona Gudang** — mis. HIJAU, MERAH, NEW, HOLD

@@ -1,5 +1,7 @@
 node_modules/
+dist/
+.env
 
-# Data runtime aplikasi (dibuat otomatis saat server pertama kali jalan)
+# Data runtime aplikasi lama (tidak dipakai lagi, dibiarkan untuk jaga-jaga)
 data.json
 backup/

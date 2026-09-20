@@ -1,9 +1,0 @@
-{
-  "name": "label-dus-gudang",
-  "private": true,
-  "version": "1.0.0",
-  "description": "Aplikasi Label Dus Gudang - Receiving & Putaway WMS untuk gudang ACC PS",
-  "scripts": {
-    "start": "node server.js"
-  }
-}
