@@ -5,13 +5,17 @@ import Suppliers from './Suppliers';
 import Zones from './Zones';
 import Locations from './Locations';
 import Products from './Products';
+import MasterUser from './MasterUser';
+import MasterParameter from './MasterParameter';
 
 const TABS = [
-  { path: '/master-data/products', label: 'Produk / SKU' },
-  { path: '/master-data/locations', label: 'Lokasi Rak' },
+  { path: '/master-data/products', label: 'Master Product' },
+  { path: '/master-data/locations', label: 'Master Location' },
+  { path: '/master-data/suppliers', label: 'Master Supplier' },
+  { path: '/master-data/users', label: 'Master User' },
+  { path: '/master-data/parameters', label: 'Master Parameter' },
   { path: '/master-data/categories', label: 'Kategori' },
   { path: '/master-data/units', label: 'Satuan' },
-  { path: '/master-data/suppliers', label: 'Supplier' },
   { path: '/master-data/zones', label: 'Zona' },
 ];
 
@@ -29,9 +33,11 @@ export default function MasterData() {
         <Route index element={<Navigate to="products" replace />} />
         <Route path="products" element={<Products />} />
         <Route path="locations" element={<Locations />} />
+        <Route path="suppliers" element={<Suppliers />} />
+        <Route path="users" element={<MasterUser />} />
+        <Route path="parameters" element={<MasterParameter />} />
         <Route path="categories" element={<Categories />} />
         <Route path="units" element={<Units />} />
-        <Route path="suppliers" element={<Suppliers />} />
         <Route path="zones" element={<Zones />} />
       </Routes>
     </div>

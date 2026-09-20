@@ -40,6 +40,8 @@ Database:
 
 Skema database untuk Modul 2-5 sudah disiapkan di `backend/db/migrations/001_init.sql` supaya pengembangan modul berikutnya tinggal dilanjutkan di atas fondasi yang sama; API dan UI-nya baru tersedia untuk Modul 1 (Master Data).
 
+Rincian spesifikasi Modul 1 mengikuti [Blueprint Modul 1 - Master Data](docs/blueprint-modul-1-master-data.md), yang terdiri dari 5 bagian: Master Product, Master Location, Master Supplier, Master User, Master Parameter. Baru **Master Product** yang field-nya sudah dirinci dan diimplementasikan penuh; Master User dan Master Parameter masih placeholder menunggu spesifikasi field.
+
 ## Struktur Proyek
 
 ```
@@ -92,9 +94,10 @@ Buka http://localhost:5173 di browser.
 
 Sudah bisa dipakai untuk mengelola:
 
-- **Produk / SKU** — kode, nama, varian, kategori, satuan, barcode, stok minimum
-- **Lokasi Rak** — kode lokasi, zona, rak, level, bin
-- **Kategori** barang
-- **Satuan (UOM)** — mis. PCS, BOX, DUS
-- **Supplier**
+- **Master Product** — barcode, SKU code, nama produk, brand, kategori, kode group, UOM, status (sesuai Blueprint Modul 1)
+- **Master Location** — kode lokasi, zona, rak, level, bin
+- **Master Supplier**
+- **Kategori** & **Satuan (UOM)** — daftar pilihan pendukung untuk form Master Product
 - **Zona Gudang** — mis. HIJAU, MERAH, NEW, HOLD
+
+Placeholder menunggu spesifikasi field: **Master User**, **Master Parameter**.

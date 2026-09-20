@@ -3,24 +3,19 @@ const pool = require('../db/pool');
 
 const router = express.Router();
 
-const SELECT = `
-  SELECT p.*, c.name AS category_name, u.code AS unit_code
-  FROM products p
-  LEFT JOIN categories c ON c.id = p.category_id
-  LEFT JOIN units u ON u.id = p.unit_id
-`;
-
 router.get('/', async (req, res, next) => {
   try {
     const { q } = req.query;
     if (q) {
       const { rows } = await pool.query(
-        `${SELECT} WHERE p.sku ILIKE $1 OR p.name ILIKE $1 ORDER BY p.id DESC`,
+        `SELECT * FROM products
+         WHERE sku_code ILIKE $1 OR product_name ILIKE $1 OR barcode ILIKE $1
+         ORDER BY id DESC`,
         [`%${q}%`]
       );
       return res.json(rows);
     }
-    const { rows } = await pool.query(`${SELECT} ORDER BY p.id DESC`);
+    const { rows } = await pool.query('SELECT * FROM products ORDER BY id DESC');
     res.json(rows);
   } catch (err) {
     next(err);
@@ -29,7 +24,7 @@ router.get('/', async (req, res, next) => {
 
 router.get('/:id', async (req, res, next) => {
   try {
-    const { rows } = await pool.query(`${SELECT} WHERE p.id = $1`, [req.params.id]);
+    const { rows } = await pool.query('SELECT * FROM products WHERE id = $1', [req.params.id]);
     if (!rows[0]) return res.status(404).json({ error: 'Produk tidak ditemukan' });
     res.json(rows[0]);
   } catch (err) {
@@ -39,33 +34,54 @@ router.get('/:id', async (req, res, next) => {
 
 router.post('/', async (req, res, next) => {
   try {
-    const { sku, name, variant, category_id, unit_id, barcode, min_stock, is_active } = req.body;
-    if (!sku || !name) return res.status(400).json({ error: 'SKU dan nama wajib diisi' });
+    const { barcode, sku_code, product_name, brand, category, group_code, uom, status } = req.body;
+    if (!sku_code || !product_name) {
+      return res.status(400).json({ error: 'SKU Code dan Nama Produk wajib diisi' });
+    }
     const { rows } = await pool.query(
-      `INSERT INTO products (sku, name, variant, category_id, unit_id, barcode, min_stock, is_active)
+      `INSERT INTO products (barcode, sku_code, product_name, brand, category, group_code, uom, status)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
-      [sku, name, variant || null, category_id || null, unit_id || null, barcode || null, min_stock || 0, is_active ?? true]
+      [
+        barcode || null,
+        sku_code,
+        product_name,
+        brand || null,
+        category || null,
+        group_code || null,
+        uom || null,
+        status || 'ACTIVE',
+      ]
     );
     res.status(201).json(rows[0]);
   } catch (err) {
-    if (err.code === '23505') return res.status(409).json({ error: 'SKU sudah dipakai' });
+    if (err.code === '23505') return res.status(409).json({ error: 'SKU Code sudah dipakai' });
     next(err);
   }
 });
 
 router.put('/:id', async (req, res, next) => {
   try {
-    const { sku, name, variant, category_id, unit_id, barcode, min_stock, is_active } = req.body;
+    const { barcode, sku_code, product_name, brand, category, group_code, uom, status } = req.body;
     const { rows } = await pool.query(
-      `UPDATE products SET sku=$1, name=$2, variant=$3, category_id=$4, unit_id=$5,
-         barcode=$6, min_stock=$7, is_active=$8, updated_at=now()
+      `UPDATE products SET barcode=$1, sku_code=$2, product_name=$3, brand=$4, category=$5,
+         group_code=$6, uom=$7, status=$8, updated_at=now()
        WHERE id=$9 RETURNING *`,
-      [sku, name, variant || null, category_id || null, unit_id || null, barcode || null, min_stock || 0, is_active ?? true, req.params.id]
+      [
+        barcode || null,
+        sku_code,
+        product_name,
+        brand || null,
+        category || null,
+        group_code || null,
+        uom || null,
+        status || 'ACTIVE',
+        req.params.id,
+      ]
     );
     if (!rows[0]) return res.status(404).json({ error: 'Produk tidak ditemukan' });
     res.json(rows[0]);
   } catch (err) {
-    if (err.code === '23505') return res.status(409).json({ error: 'SKU sudah dipakai' });
+    if (err.code === '23505') return res.status(409).json({ error: 'SKU Code sudah dipakai' });
     next(err);
   }
 });
