@@ -53,7 +53,10 @@ app.use((err, _req, res, _next) => {
   if (dbConnErrorCodes.includes(err.code)) {
     console.error('Koneksi database gagal:', err.code, err.message);
     return res.status(500).json({
-      error: 'Tidak bisa terhubung ke database. Cek DATABASE_URL di environment variable server.',
+      error:
+        'Tidak bisa terhubung ke database. Belum ada database yang terhubung ke server ini ' +
+        '(env var DATABASE_URL / POSTGRES_URL kosong atau salah) — tambahkan Postgres lewat ' +
+        'Vercel Storage, atau set DATABASE_URL secara manual.',
     });
   }
   console.error(err);
