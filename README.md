@@ -40,7 +40,9 @@ Database:
 
 Skema database untuk Modul 2-5 sudah disiapkan di `backend/db/migrations/001_init.sql` supaya pengembangan modul berikutnya tinggal dilanjutkan di atas fondasi yang sama; API dan UI-nya baru tersedia untuk Modul 1 (Master Data).
 
-Rincian spesifikasi Modul 1 mengikuti [Blueprint Modul 1 - Master Data](docs/blueprint-modul-1-master-data.md), yang terdiri dari 6 bagian: Master Product, Master Location, Master Supplier, Master User, Master Parameter, Master Stock. Yang field-nya sudah dirinci dan diimplementasikan penuh: **Master Product**, **Master Stock**. Master User dan Master Parameter masih placeholder menunggu spesifikasi field.
+Rincian spesifikasi Modul 1 mengikuti [Blueprint Modul 1 - Master Data](docs/blueprint-modul-1-master-data.md), yang terdiri dari 6 bagian: Master Product, Master Location, Master Supplier, Master User, Master Parameter, Master Stock. Yang field-nya sudah dirinci dan diimplementasikan penuh: **Master Product**, **Master User**, **Master Stock**. Master Parameter masih placeholder menunggu spesifikasi field.
+
+Relasi antar tabel didokumentasikan di [ERD WMS Gudang ACC](docs/erd-wms-gudang-acc.md).
 
 ## Struktur Proyek
 
@@ -111,8 +113,11 @@ Sudah bisa dipakai untuk mengelola:
 - **Master Product** — barcode, SKU code, nama produk, brand, kategori, kode group, UOM, status (sesuai Blueprint Modul 1)
 - **Master Location** — kode lokasi, zona, rak, level, bin
 - **Master Supplier**
+- **Master User** — username, nama lengkap, role (ADMIN/SPV_GUDANG/STAFF_GUDANG/PICKER/QC), status; tabel menampilkan hak akses per role sebagai referensi
 - **Master Stock** — menghubungkan produk + lokasi + jumlah (qty & qty tersedia)
 - **Kategori** & **Satuan (UOM)** — daftar pilihan pendukung untuk form Master Product
 - **Zona Gudang** — mis. HIJAU, MERAH, NEW, HOLD
 
-Placeholder menunggu spesifikasi field: **Master User**, **Master Parameter**.
+Placeholder menunggu spesifikasi field: **Master Parameter**.
+
+> Catatan: Master User saat ini adalah data identitas & role saja. Belum ada sistem login/autentikasi, jadi role belum ditegakkan sebagai hak akses nyata di aplikasi — itu menyusul seiring modul-modul terkait (Receiving, Picking, Cycle Count, dst.) dibangun.
