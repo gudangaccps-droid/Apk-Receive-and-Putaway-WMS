@@ -4,12 +4,6 @@ const { upload, parseCsvBuffer } = require('../importUpload');
 
 const router = express.Router();
 
-const SELECT = `
-  SELECT l.*, z.code AS zone_code, z.name AS zone_name
-  FROM locations l
-  LEFT JOIN zones z ON z.id = l.zone_id
-`;
-
 // Alur: Master Location Excel -> Import System -> Validation -> Location Active
 router.post('/import', upload.single('file'), async (req, res, next) => {
   try {
@@ -23,46 +17,35 @@ router.post('/import', upload.single('file'), async (req, res, next) => {
 
     for (let i = 0; i < rows.length; i++) {
       const row = rows[i];
-      const code = (row.code || '').trim();
-      if (!code) {
+      const location_code = (row.location_code || '').trim();
+      if (!location_code) {
         skipped++;
-        errors.push(`Baris ${i + 2}: code kosong`);
+        errors.push(`Baris ${i + 2}: location_code kosong`);
         continue;
       }
 
-      let zone_id = null;
-      const zoneCode = (row.zone_code || '').trim();
-      if (zoneCode) {
-        const zoneRes = await pool.query('SELECT id FROM zones WHERE code = $1', [zoneCode]);
-        if (!zoneRes.rows[0]) {
-          skipped++;
-          errors.push(`Baris ${i + 2}: zona "${zoneCode}" tidak ditemukan`);
-          continue;
-        }
-        zone_id = zoneRes.rows[0].id;
-      }
-
       const values = [
-        code,
-        zone_id,
+        location_code,
+        (row.area || '').trim() || null,
+        (row.group_code || '').trim() || null,
         (row.rack || '').trim() || null,
-        (row.level || '').trim() || null,
-        (row.bin || '').trim() || null,
+        (row.shelf || '').trim() || null,
+        (row.position || '').trim() || null,
         (row.description || '').trim() || null,
       ];
 
-      const existing = await pool.query('SELECT id FROM locations WHERE code = $1', [code]);
+      const existing = await pool.query('SELECT id FROM locations WHERE location_code = $1', [location_code]);
       if (existing.rows[0]) {
         await pool.query(
-          `UPDATE locations SET code=$1, zone_id=$2, rack=$3, level=$4, bin=$5, description=$6, is_active=true
-           WHERE id=$7`,
+          `UPDATE locations SET location_code=$1, area=$2, group_code=$3, rack=$4, shelf=$5, position=$6,
+             description=$7, status='ACTIVE' WHERE id=$8`,
           [...values, existing.rows[0].id]
         );
         updated++;
       } else {
         await pool.query(
-          `INSERT INTO locations (code, zone_id, rack, level, bin, description, is_active)
-           VALUES ($1,$2,$3,$4,$5,$6,true)`,
+          `INSERT INTO locations (location_code, area, group_code, rack, shelf, position, description, status)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,'ACTIVE')`,
           values
         );
         inserted++;
@@ -77,7 +60,7 @@ router.post('/import', upload.single('file'), async (req, res, next) => {
 
 router.get('/', async (_req, res, next) => {
   try {
-    const { rows } = await pool.query(`${SELECT} ORDER BY l.code`);
+    const { rows } = await pool.query('SELECT * FROM locations ORDER BY location_code');
     res.json(rows);
   } catch (err) {
     next(err);
@@ -86,7 +69,7 @@ router.get('/', async (_req, res, next) => {
 
 router.get('/:id', async (req, res, next) => {
   try {
-    const { rows } = await pool.query(`${SELECT} WHERE l.id = $1`, [req.params.id]);
+    const { rows } = await pool.query('SELECT * FROM locations WHERE id = $1', [req.params.id]);
     if (!rows[0]) return res.status(404).json({ error: 'Lokasi tidak ditemukan' });
     res.json(rows[0]);
   } catch (err) {
@@ -96,12 +79,21 @@ router.get('/:id', async (req, res, next) => {
 
 router.post('/', async (req, res, next) => {
   try {
-    const { code, zone_id, rack, level, bin, description, is_active } = req.body;
-    if (!code) return res.status(400).json({ error: 'Kode lokasi wajib diisi' });
+    const { location_code, area, group_code, rack, shelf, position, description, status } = req.body;
+    if (!location_code) return res.status(400).json({ error: 'Kode lokasi wajib diisi' });
     const { rows } = await pool.query(
-      `INSERT INTO locations (code, zone_id, rack, level, bin, description, is_active)
-       VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
-      [code, zone_id || null, rack || null, level || null, bin || null, description || null, is_active ?? true]
+      `INSERT INTO locations (location_code, area, group_code, rack, shelf, position, description, status)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
+      [
+        location_code,
+        area || null,
+        group_code || null,
+        rack || null,
+        shelf || null,
+        position || null,
+        description || null,
+        status || 'ACTIVE',
+      ]
     );
     res.status(201).json(rows[0]);
   } catch (err) {
@@ -112,11 +104,22 @@ router.post('/', async (req, res, next) => {
 
 router.put('/:id', async (req, res, next) => {
   try {
-    const { code, zone_id, rack, level, bin, description, is_active } = req.body;
+    const { location_code, area, group_code, rack, shelf, position, description, status } = req.body;
     const { rows } = await pool.query(
-      `UPDATE locations SET code=$1, zone_id=$2, rack=$3, level=$4, bin=$5, description=$6, is_active=$7
-       WHERE id=$8 RETURNING *`,
-      [code, zone_id || null, rack || null, level || null, bin || null, description || null, is_active ?? true, req.params.id]
+      `UPDATE locations SET location_code=$1, area=$2, group_code=$3, rack=$4, shelf=$5, position=$6,
+         description=$7, status=$8
+       WHERE id=$9 RETURNING *`,
+      [
+        location_code,
+        area || null,
+        group_code || null,
+        rack || null,
+        shelf || null,
+        position || null,
+        description || null,
+        status || 'ACTIVE',
+        req.params.id,
+      ]
     );
     if (!rows[0]) return res.status(404).json({ error: 'Lokasi tidak ditemukan' });
     res.json(rows[0]);

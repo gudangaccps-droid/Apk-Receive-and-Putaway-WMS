@@ -4,7 +4,7 @@ const pool = require('../db/pool');
 const router = express.Router();
 
 const SELECT = `
-  SELECT s.*, p.sku_code, p.product_name, p.uom, l.code AS location_code
+  SELECT s.*, p.sku_code, p.product_name, p.uom, l.location_code
   FROM stocks s
   JOIN products p ON p.id = s.product_id
   JOIN locations l ON l.id = s.location_id
@@ -12,7 +12,7 @@ const SELECT = `
 
 router.get('/', async (_req, res, next) => {
   try {
-    const { rows } = await pool.query(`${SELECT} ORDER BY p.sku_code, l.code`);
+    const { rows } = await pool.query(`${SELECT} ORDER BY p.sku_code, l.location_code`);
     res.json(rows);
   } catch (err) {
     next(err);
@@ -34,11 +34,11 @@ router.get('/find', async (req, res, next) => {
     if (!product) return res.status(404).json({ error: 'Produk tidak ditemukan' });
 
     const { rows: locations } = await pool.query(
-      `SELECT s.qty, s.available_qty, l.code AS location_code, l.rack, l.level, l.bin
+      `SELECT s.qty, s.available_qty, l.location_code, l.rack, l.shelf, l.position
        FROM stocks s
        JOIN locations l ON l.id = s.location_id
        WHERE s.product_id = $1
-       ORDER BY l.code`,
+       ORDER BY l.location_code`,
       [product.id]
     );
 
@@ -64,11 +64,12 @@ router.post('/', async (req, res, next) => {
     if (!product_id || !location_id) {
       return res.status(400).json({ error: 'Produk dan lokasi wajib diisi' });
     }
-    const qtyVal = qty || 0;
+    const qtyVal = Math.round(Number(qty)) || 0;
+    const availVal = available_qty !== undefined && available_qty !== '' ? Math.round(Number(available_qty)) : qtyVal;
     const { rows } = await pool.query(
       `INSERT INTO stocks (product_id, location_id, qty, available_qty)
        VALUES ($1,$2,$3,$4) RETURNING *`,
-      [product_id, location_id, qtyVal, available_qty ?? qtyVal]
+      [product_id, location_id, qtyVal, availVal]
     );
     res.status(201).json(rows[0]);
   } catch (err) {
@@ -82,11 +83,12 @@ router.post('/', async (req, res, next) => {
 router.put('/:id', async (req, res, next) => {
   try {
     const { product_id, location_id, qty, available_qty } = req.body;
-    const qtyVal = qty || 0;
+    const qtyVal = Math.round(Number(qty)) || 0;
+    const availVal = available_qty !== undefined && available_qty !== '' ? Math.round(Number(available_qty)) : qtyVal;
     const { rows } = await pool.query(
       `UPDATE stocks SET product_id=$1, location_id=$2, qty=$3, available_qty=$4, updated_at=now()
        WHERE id=$5 RETURNING *`,
-      [product_id, location_id, qtyVal, available_qty ?? qtyVal, req.params.id]
+      [product_id, location_id, qtyVal, availVal, req.params.id]
     );
     if (!rows[0]) return res.status(404).json({ error: 'Stok tidak ditemukan' });
     res.json(rows[0]);

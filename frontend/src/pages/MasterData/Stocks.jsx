@@ -95,7 +95,7 @@ export default function Stocks() {
             <option value="">- pilih lokasi -</option>
             {locations.map((l) => (
               <option key={l.id} value={l.id}>
-                {l.code}
+                {l.location_code}
               </option>
             ))}
           </select>
@@ -105,7 +105,7 @@ export default function Stocks() {
           <input
             type="number"
             min="0"
-            step="any"
+            step="1"
             value={form.qty ?? ''}
             onChange={(e) => setForm({ ...form, qty: e.target.value })}
           />
@@ -115,7 +115,7 @@ export default function Stocks() {
           <input
             type="number"
             min="0"
-            step="any"
+            step="1"
             placeholder="default = Qty"
             value={form.available_qty ?? ''}
             onChange={(e) => setForm({ ...form, available_qty: e.target.value })}
