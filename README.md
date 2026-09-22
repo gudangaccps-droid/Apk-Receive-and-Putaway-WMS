@@ -101,17 +101,24 @@ Buka http://localhost:5173 di browser.
 
 ## Deploy ke Vercel
 
-`vercel.json` di root sudah dikonfigurasi supaya Vercel hanya build & serve folder `frontend/` (Vite SPA) — cukup import repo ini ke Vercel apa adanya, tidak perlu mengubah Root Directory di dashboard.
+Frontend **dan** backend di-deploy jadi satu, dalam satu project Vercel — tidak perlu hosting backend terpisah:
 
-Yang **belum** ter-cover oleh Vercel: backend (Express + PostgreSQL). Vercel bersifat serverless dan tidak cocok menjalankan server Express + koneksi database persisten seperti ini apa adanya. Backend perlu di-deploy terpisah ke platform seperti Railway, Render, atau Fly.io, dengan database PostgreSQL cloud (mis. Neon atau Supabase).
+- `vercel.json` men-build & serve folder `frontend/` (Vite SPA) sebagai situs statis.
+- `api/[...slug].js` membungkus backend Express sebagai satu Vercel Serverless Function yang menangani semua request `/api/*`.
+- Karena frontend & backend satu origin, frontend otomatis memanggil path relatif `/api/...` di production (lihat `frontend/src/api/client.js`) — **tidak perlu** set `VITE_API_URL` di Vercel.
 
-Setelah backend punya URL publik, set environment variable berikut di Vercel (Project Settings → Environment Variables):
+Cukup import repo ini ke Vercel apa adanya, tidak perlu mengubah Root Directory di dashboard.
 
-```
-VITE_API_URL=https://<url-backend-anda>/api
-```
+### Yang wajib disiapkan: database PostgreSQL cloud
 
-Tanpa ini, frontend yang di-deploy ke Vercel akan mencoba mengakses `http://localhost:4000/api` (gagal, karena itu alamat lokal) — jadi Master Data belum bisa dipakai sampai backend juga online dan variabel ini di-set.
+Serverless function di Vercel tidak bisa menjangkau PostgreSQL yang jalan di `localhost` — itu cuma ada di komputer/sandbox tempat dia dijalankan. Vercel butuh database yang bisa diakses lewat internet. Langkah tercepat pakai [Neon](https://neon.tech) (gratis, resmi terintegrasi dengan Vercel):
+
+1. Buat project baru di Neon (atau Supabase, atau provider PostgreSQL cloud lain), catat **connection string**-nya.
+2. Terapkan skema ke database itu — jalankan `backend/db/schema.sql` lalu `backend/db/seed.sql` lewat SQL editor Neon/Supabase, atau dari komputer Anda: `psql "<connection-string>" -f backend/db/schema.sql` (lihat catatan di dalam file itu — jangan dicampur dengan `npm run migrate`).
+3. Di Vercel: Project Settings → Environment Variables → tambahkan `DATABASE_URL` = connection string dari langkah 1.
+4. Redeploy (push apa saja ke `main`, atau klik Redeploy di dashboard Vercel).
+
+Tanpa `DATABASE_URL` ter-set ke database yang benar-benar bisa diakses dari internet, Master Data tidak akan bisa menyimpan data meskipun halamannya sudah bisa dibuka.
 
 ## Modul 1: Master Data
 
