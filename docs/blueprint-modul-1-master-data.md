@@ -31,9 +31,10 @@ Modul ini terdiri dari:
 3. Master Supplier
 4. Master User
 5. Master Parameter
+6. Master Stock
 
 > Status: field detail untuk Location, Supplier, User, dan Parameter menyusul.
-> Yang sudah dirinci dan diimplementasikan sejauh ini: **Master Product**.
+> Yang sudah dirinci dan diimplementasikan sejauh ini: **Master Product**, **Master Stock**.
 
 ---
 
@@ -70,3 +71,42 @@ Nama: `Anker Charger 20W`
 Group: `CHR`
 
 UOM: `PCS`
+
+---
+
+## 5. MASTER STOCK
+
+### Fungsi
+
+Menghubungkan:
+
+Produk
+
++
+
+Lokasi
+
++
+
+Jumlah
+
+### Database
+
+Table: `stocks`
+
+Field:
+
+| Field | Description |
+|---|---|
+| product_id | Produk |
+| location_id | Lokasi |
+| qty | Jumlah |
+| available_qty | Stok tersedia |
+
+### Contoh
+
+Product: `Anker Charger 20W`
+
+Location: `A-CHR-R01-B01-P01`
+
+Qty: `50 PCS`

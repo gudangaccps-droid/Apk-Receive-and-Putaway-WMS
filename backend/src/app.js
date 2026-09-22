@@ -4,6 +4,7 @@ const cors = require('cors');
 const simpleCrudRouter = require('./routes/simpleCrud');
 const productsRouter = require('./routes/products');
 const locationsRouter = require('./routes/locations');
+const stocksRouter = require('./routes/stocks');
 
 const app = express();
 app.use(cors());
@@ -35,6 +36,7 @@ app.use('/api/zones', simpleCrudRouter('zones', [
 ]));
 app.use('/api/locations', locationsRouter);
 app.use('/api/products', productsRouter);
+app.use('/api/stocks', stocksRouter);
 
 // eslint-disable-next-line no-unused-vars
 app.use((err, _req, res, _next) => {
