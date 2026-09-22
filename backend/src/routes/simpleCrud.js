@@ -36,12 +36,18 @@ function simpleCrudRouter(table, columns) {
           return res.status(400).json({ error: `${c.name} wajib diisi` });
         }
       }
-      const values = cols.map((c) => req.body[c] ?? null);
-      const placeholders = cols.map((_, i) => `$${i + 1}`).join(', ');
-      const { rows } = await pool.query(
-        `INSERT INTO ${table} (${cols.join(', ')}) VALUES (${placeholders}) RETURNING *`,
-        values
-      );
+      // Hanya sertakan kolom yang benar-benar dikirim, supaya kolom yang
+      // tidak diisi memakai DEFAULT dari database, bukan ditimpa NULL
+      // (mis. suppliers.is_active NOT NULL DEFAULT true).
+      const provided = cols.filter((c) => req.body[c] !== undefined);
+      const values = provided.map((c) => req.body[c] ?? null);
+      const { rows } = provided.length
+        ? await pool.query(
+            `INSERT INTO ${table} (${provided.join(', ')})
+             VALUES (${provided.map((_, i) => `$${i + 1}`).join(', ')}) RETURNING *`,
+            values
+          )
+        : await pool.query(`INSERT INTO ${table} DEFAULT VALUES RETURNING *`);
       res.status(201).json(rows[0]);
     } catch (err) {
       next(err);
@@ -50,10 +56,16 @@ function simpleCrudRouter(table, columns) {
 
   router.put('/:id', async (req, res, next) => {
     try {
-      const values = cols.map((c) => req.body[c] ?? null);
-      const setClause = cols.map((c, i) => `${c} = $${i + 1}`).join(', ');
+      const provided = cols.filter((c) => req.body[c] !== undefined);
+      if (provided.length === 0) {
+        const { rows } = await pool.query(`SELECT * FROM ${table} WHERE id = $1`, [req.params.id]);
+        if (!rows[0]) return res.status(404).json({ error: `${table} tidak ditemukan` });
+        return res.json(rows[0]);
+      }
+      const values = provided.map((c) => req.body[c] ?? null);
+      const setClause = provided.map((c, i) => `${c} = $${i + 1}`).join(', ');
       const { rows } = await pool.query(
-        `UPDATE ${table} SET ${setClause} WHERE id = $${cols.length + 1} RETURNING *`,
+        `UPDATE ${table} SET ${setClause} WHERE id = $${provided.length + 1} RETURNING *`,
         [...values, req.params.id]
       );
       if (!rows[0]) return res.status(404).json({ error: `${table} tidak ditemukan` });
