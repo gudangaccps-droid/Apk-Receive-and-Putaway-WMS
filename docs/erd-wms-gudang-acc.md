@@ -33,6 +33,29 @@ USER
 ACTIVITY_LOG
 ```
 
+## Kardinalitas
+
+```
+1 Product
+     |
+     |
+Many Stock
+
+
+1 Location
+     |
+     |
+Many Stock
+
+
+1 User
+     |
+     |
+Many Transaction
+```
+
+Satu Produk bisa tersimpan di banyak baris Stock (satu per Lokasi), dan satu Lokasi bisa menyimpan banyak baris Stock (satu per Produk) — sesuai constraint `UNIQUE (product_id, location_id)` di tabel `stocks`. Satu User bisa punya banyak Transaction (dipetakan ke tabel `stock_movements`, tiap baris mutasi stok tercatat atas satu `user_id`).
+
 ## Diagram
 
 ```mermaid
@@ -55,5 +78,5 @@ erDiagram
 | RECEIVING | `receiving_headers` | Header penerimaan barang |
 | RECEIVING_ITEMS | `receiving_items` | Baris item per penerimaan (`product_id`, `receiving_id`) |
 | USER | `users` | Master User |
-| STOCK_MOVEMENT | `stock_movements` | Riwayat mutasi stok (`user_id`) |
+| STOCK_MOVEMENT (Transaction) | `stock_movements` | Riwayat mutasi stok (`user_id`) |
 | ACTIVITY_LOG | `activity_log` | Log aktivitas user di sistem (`user_id`) |
