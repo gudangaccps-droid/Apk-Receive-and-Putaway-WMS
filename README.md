@@ -81,6 +81,13 @@ npm run seed           # data awal (satuan & zona default)
 npm run dev
 ```
 
+Alternatif untuk `npm run migrate`: database baru bisa juga dibuat langsung dari satu file skema lengkap, `backend/db/schema.sql` (lihat komentar di file itu untuk detail & batasannya):
+
+```bash
+psql -d wms_acc -f backend/db/schema.sql
+psql -d wms_acc -f backend/db/seed.sql
+```
+
 **Frontend** (di terminal terpisah):
 
 ```bash
