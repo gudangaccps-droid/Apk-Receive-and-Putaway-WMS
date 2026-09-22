@@ -33,8 +33,8 @@ Modul ini terdiri dari:
 5. Master Parameter
 6. Master Stock
 
-> Status: field detail untuk Location, Supplier, User, dan Parameter menyusul.
-> Yang sudah dirinci dan diimplementasikan sejauh ini: **Master Product**, **Master Stock**.
+> Status: field detail untuk Location, Supplier, dan Parameter menyusul.
+> Yang sudah dirinci dan diimplementasikan sejauh ini: **Master Product**, **Master User**, **Master Stock**.
 
 ---
 
@@ -74,7 +74,51 @@ UOM: `PCS`
 
 ---
 
-## 5. MASTER STOCK
+## 4. MASTER USER
+
+### Fungsi
+
+Menyimpan akun staff gudang beserta role & hak aksesnya.
+
+### Role
+
+- ADMIN
+- SPV_GUDANG
+- STAFF_GUDANG
+- PICKER
+- QC
+
+### Hak Akses
+
+| Role | Hak Akses |
+|---|---|
+| ADMIN | Akses penuh ke seluruh modul |
+| SPV_GUDANG | Monitoring, Approval, Report |
+| STAFF_GUDANG | Receiving, Putaway |
+| PICKER | Picking |
+| QC | Cycle Count |
+
+### Database
+
+Table: `users`
+
+Field:
+
+| Field | Type | Description |
+|---|---|---|
+| id | BIGINT | Primary Key |
+| username | VARCHAR | Username login |
+| full_name | VARCHAR | Nama lengkap |
+| role | VARCHAR | ADMIN / SPV_GUDANG / STAFF_GUDANG / PICKER / QC |
+| status | VARCHAR | Status akun (ACTIVE/INACTIVE) |
+
+> Catatan: tabel ini menyimpan identitas & role user (master data), belum termasuk
+> autentikasi (login/password) atau penegakan hak akses di level aplikasi — itu
+> menyusul saat modul-modul terkait (Receiving, Picking, Cycle Count, dst.) dibangun.
+
+---
+
+## 6. MASTER STOCK
 
 ### Fungsi
 

@@ -5,6 +5,7 @@ const simpleCrudRouter = require('./routes/simpleCrud');
 const productsRouter = require('./routes/products');
 const locationsRouter = require('./routes/locations');
 const stocksRouter = require('./routes/stocks');
+const usersRouter = require('./routes/users');
 
 const app = express();
 app.use(cors());
@@ -37,6 +38,7 @@ app.use('/api/zones', simpleCrudRouter('zones', [
 app.use('/api/locations', locationsRouter);
 app.use('/api/products', productsRouter);
 app.use('/api/stocks', stocksRouter);
+app.use('/api/users', usersRouter);
 
 // eslint-disable-next-line no-unused-vars
 app.use((err, _req, res, _next) => {
