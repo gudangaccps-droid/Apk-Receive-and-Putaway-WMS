@@ -1,28 +1,103 @@
-# Apk-Receive-and-Putaway-WMS
+# WMS Gudang ACC
 
-Aplikasi **Label Dus Gudang** — untuk proses *Receiving* (penerimaan barang) dan *Putaway* (penyusunan barang ke rak) di gudang ACC PS.
+Warehouse Management System untuk mengelola operasional Gudang Aksesoris Partshop.
 
-Aplikasi ini berjalan lokal (tanpa internet), berbasis browser + server Node.js ringan tanpa dependency eksternal.
+## Tujuan Sistem
 
-## Fitur
+Membangun sistem gudang berbasis data:
 
-- **Input & Daftar** — catat setiap dus/label barang masuk (tanggal terima, supplier, No GRN/SJ, SKU, nama barang, varian, PIC, qty, lokasi, zona, status), dengan pencarian & filter.
-- **Putaway (FIFO)** — daftar dus yang belum disusun, diurutkan FIFO (stok tertua per SKU diprioritaskan), mendukung penyusunan sebagian (partial putaway) dengan qty & lokasi rak tujuan.
-- **Riwayat Disusun** — riwayat tiap transaksi penyusunan per label, termasuk yang baru tersusun sebagian.
-- **Cetak Label** — cetak label dus siap tempel lengkap dengan barcode (CODE128), 8 label per lembar A4.
-- **Export / Import Excel** — backup dan pemulihan data lewat file Excel.
-- **Mode Server Lokal** — data dibagikan ke semua staff di jaringan/WiFi yang sama lewat server lokal; kalau server tidak aktif, otomatis memakai `localStorage` di browser masing-masing.
+- Mengetahui lokasi setiap barang
+- Mengurangi kesalahan picking
+- Mempercepat pencarian barang
+- Meningkatkan akurasi stok
+- Membuat aktivitas gudang dapat dimonitor
 
-## Cara menjalankan
+## Prinsip Sistem
 
-Lihat panduan lengkap di [CARA-PAKAI.md](CARA-PAKAI.md).
+"Barang harus ditemukan berdasarkan data, bukan berdasarkan ingatan manusia."
 
-Ringkas:
+## Teknologi
 
-```bash
-node server.js
+Frontend:
+- React (Vite)
+
+Backend:
+- Node.js + Express
+
+Database:
+- PostgreSQL
+
+## Modul
+
+| # | Modul | Status |
+|---|---|---|
+| 1 | Master Data | **Development** |
+| 2 | Receiving & Putaway | Planned |
+| 3 | Inventory Management | Planned |
+| 4 | Picking | Planned |
+| 5 | Cycle Count | Planned |
+| 6 | Dashboard | Planned |
+
+Skema database untuk Modul 2-5 sudah disiapkan di `backend/db/migrations/001_init.sql` supaya pengembangan modul berikutnya tinggal dilanjutkan di atas fondasi yang sama; API dan UI-nya baru tersedia untuk Modul 1 (Master Data).
+
+Rincian spesifikasi Modul 1 mengikuti [Blueprint Modul 1 - Master Data](docs/blueprint-modul-1-master-data.md), yang terdiri dari 5 bagian: Master Product, Master Location, Master Supplier, Master User, Master Parameter. Baru **Master Product** yang field-nya sudah dirinci dan diimplementasikan penuh; Master User dan Master Parameter masih placeholder menunggu spesifikasi field.
+
+## Struktur Proyek
+
+```
+backend/    API Express (REST) + skema & migrasi PostgreSQL
+frontend/   Aplikasi React (Vite)
+docker-compose.yml   Menjalankan database + backend + frontend sekaligus
 ```
 
-Lalu buka `http://localhost:3000` di browser. Staff lain di jaringan yang sama bisa membuka alamat IP yang ditampilkan di terminal.
+## Menjalankan secara lokal
 
-Di Windows, cukup klik dua kali `JALANKAN-WINDOWS.bat`.
+### Opsi 1 — Docker Compose (disarankan)
+
+```bash
+docker compose up --build
+```
+
+- Frontend: http://localhost:5173
+- Backend API: http://localhost:4000/api
+- Database: PostgreSQL di port 5432 (kredensial di `docker-compose.yml`)
+
+Migrasi & seed database berjalan otomatis saat container backend pertama kali start.
+
+### Opsi 2 — Manual (tanpa Docker)
+
+Butuh Node.js 20+ dan PostgreSQL yang sudah jalan.
+
+**Backend:**
+
+```bash
+cd backend
+cp .env.example .env   # sesuaikan DATABASE_URL bila perlu
+npm install
+npm run migrate        # membuat skema tabel
+npm run seed           # data awal (satuan & zona default)
+npm run dev
+```
+
+**Frontend** (di terminal terpisah):
+
+```bash
+cd frontend
+cp .env.example .env
+npm install
+npm run dev
+```
+
+Buka http://localhost:5173 di browser.
+
+## Modul 1: Master Data
+
+Sudah bisa dipakai untuk mengelola:
+
+- **Master Product** — barcode, SKU code, nama produk, brand, kategori, kode group, UOM, status (sesuai Blueprint Modul 1)
+- **Master Location** — kode lokasi, zona, rak, level, bin
+- **Master Supplier**
+- **Kategori** & **Satuan (UOM)** — daftar pilihan pendukung untuk form Master Product
+- **Zona Gudang** — mis. HIJAU, MERAH, NEW, HOLD
+
+Placeholder menunggu spesifikasi field: **Master User**, **Master Parameter**.
