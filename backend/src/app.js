@@ -49,6 +49,13 @@ app.use((err, _req, res, _next) => {
   if (err.code === '22001') {
     return res.status(400).json({ error: 'Salah satu isian melebihi panjang maksimum kolomnya' });
   }
+  const dbConnErrorCodes = ['ECONNREFUSED', 'ENOTFOUND', 'ETIMEDOUT', 'EAI_AGAIN', '28P01', '3D000', '28000'];
+  if (dbConnErrorCodes.includes(err.code)) {
+    console.error('Koneksi database gagal:', err.code, err.message);
+    return res.status(500).json({
+      error: 'Tidak bisa terhubung ke database. Cek DATABASE_URL di environment variable server.',
+    });
+  }
   console.error(err);
   res.status(500).json({ error: 'Terjadi kesalahan pada server' });
 });
