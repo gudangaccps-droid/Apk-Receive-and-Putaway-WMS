@@ -90,6 +90,20 @@ npm run dev
 
 Buka http://localhost:5173 di browser.
 
+## Deploy ke Vercel
+
+`vercel.json` di root sudah dikonfigurasi supaya Vercel hanya build & serve folder `frontend/` (Vite SPA) — cukup import repo ini ke Vercel apa adanya, tidak perlu mengubah Root Directory di dashboard.
+
+Yang **belum** ter-cover oleh Vercel: backend (Express + PostgreSQL). Vercel bersifat serverless dan tidak cocok menjalankan server Express + koneksi database persisten seperti ini apa adanya. Backend perlu di-deploy terpisah ke platform seperti Railway, Render, atau Fly.io, dengan database PostgreSQL cloud (mis. Neon atau Supabase).
+
+Setelah backend punya URL publik, set environment variable berikut di Vercel (Project Settings → Environment Variables):
+
+```
+VITE_API_URL=https://<url-backend-anda>/api
+```
+
+Tanpa ini, frontend yang di-deploy ke Vercel akan mencoba mengakses `http://localhost:4000/api` (gagal, karena itu alamat lokal) — jadi Master Data belum bisa dipakai sampai backend juga online dan variabel ini di-set.
+
 ## Modul 1: Master Data
 
 Sudah bisa dipakai untuk mengelola:
