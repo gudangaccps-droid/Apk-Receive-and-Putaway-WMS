@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const multer = require('multer');
 
 const simpleCrudRouter = require('./routes/simpleCrud');
 const productsRouter = require('./routes/products');
@@ -42,6 +43,9 @@ app.use('/api/users', usersRouter);
 
 // eslint-disable-next-line no-unused-vars
 app.use((err, _req, res, _next) => {
+  if (err instanceof multer.MulterError || err.message === 'Hanya file .csv yang didukung') {
+    return res.status(400).json({ error: err.message });
+  }
   console.error(err);
   res.status(500).json({ error: 'Terjadi kesalahan pada server' });
 });

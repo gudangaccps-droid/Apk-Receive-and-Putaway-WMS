@@ -19,6 +19,35 @@ router.get('/', async (_req, res, next) => {
   }
 });
 
+// Alur: Barcode Scanner -> Search Product -> Find Location -> Display Location
+// Harus didaftarkan sebelum GET /:id supaya "find" tidak ketangkap sebagai :id.
+router.get('/find', async (req, res, next) => {
+  try {
+    const code = (req.query.code || '').trim();
+    if (!code) return res.status(400).json({ error: 'Barcode/SKU wajib diisi' });
+
+    const productRes = await pool.query(
+      `SELECT * FROM products WHERE barcode = $1 OR sku_code = $1 LIMIT 1`,
+      [code]
+    );
+    const product = productRes.rows[0];
+    if (!product) return res.status(404).json({ error: 'Produk tidak ditemukan' });
+
+    const { rows: locations } = await pool.query(
+      `SELECT s.qty, s.available_qty, l.code AS location_code, l.rack, l.level, l.bin
+       FROM stocks s
+       JOIN locations l ON l.id = s.location_id
+       WHERE s.product_id = $1
+       ORDER BY l.code`,
+      [product.id]
+    );
+
+    res.json({ product, locations });
+  } catch (err) {
+    next(err);
+  }
+});
+
 router.get('/:id', async (req, res, next) => {
   try {
     const { rows } = await pool.query(`${SELECT} WHERE s.id = $1`, [req.params.id]);

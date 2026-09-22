@@ -1,7 +1,63 @@
 const express = require('express');
 const pool = require('../db/pool');
+const { upload, parseCsvBuffer } = require('../importUpload');
 
 const router = express.Router();
+
+// Alur: Supplier/Product Data -> Admin Import Product -> Validation -> Product Active
+router.post('/import', upload.single('file'), async (req, res, next) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'File CSV wajib diunggah' });
+    const rows = parseCsvBuffer(req.file.buffer);
+
+    let inserted = 0;
+    let updated = 0;
+    let skipped = 0;
+    const errors = [];
+
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      const sku_code = (row.sku_code || '').trim();
+      const product_name = (row.product_name || '').trim();
+      if (!sku_code || !product_name) {
+        skipped++;
+        errors.push(`Baris ${i + 2}: sku_code / product_name kosong`);
+        continue;
+      }
+      const values = [
+        (row.barcode || '').trim() || null,
+        sku_code,
+        product_name,
+        (row.brand || '').trim() || null,
+        (row.category || '').trim() || null,
+        (row.group_code || '').trim() || null,
+        (row.uom || '').trim() || null,
+        (row.status || '').trim() || 'ACTIVE',
+      ];
+
+      const existing = await pool.query('SELECT id FROM products WHERE sku_code = $1', [sku_code]);
+      if (existing.rows[0]) {
+        await pool.query(
+          `UPDATE products SET barcode=$1, sku_code=$2, product_name=$3, brand=$4, category=$5,
+             group_code=$6, uom=$7, status=$8, updated_at=now() WHERE id=$9`,
+          [...values, existing.rows[0].id]
+        );
+        updated++;
+      } else {
+        await pool.query(
+          `INSERT INTO products (barcode, sku_code, product_name, brand, category, group_code, uom, status)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8)`,
+          values
+        );
+        inserted++;
+      }
+    }
+
+    res.json({ total: rows.length, inserted, updated, skipped, errors });
+  } catch (err) {
+    next(err);
+  }
+});
 
 router.get('/', async (req, res, next) => {
   try {

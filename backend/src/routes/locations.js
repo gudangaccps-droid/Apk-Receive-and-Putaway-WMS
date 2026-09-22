@@ -1,5 +1,6 @@
 const express = require('express');
 const pool = require('../db/pool');
+const { upload, parseCsvBuffer } = require('../importUpload');
 
 const router = express.Router();
 
@@ -8,6 +9,71 @@ const SELECT = `
   FROM locations l
   LEFT JOIN zones z ON z.id = l.zone_id
 `;
+
+// Alur: Master Location Excel -> Import System -> Validation -> Location Active
+router.post('/import', upload.single('file'), async (req, res, next) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'File CSV wajib diunggah' });
+    const rows = parseCsvBuffer(req.file.buffer);
+
+    let inserted = 0;
+    let updated = 0;
+    let skipped = 0;
+    const errors = [];
+
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      const code = (row.code || '').trim();
+      if (!code) {
+        skipped++;
+        errors.push(`Baris ${i + 2}: code kosong`);
+        continue;
+      }
+
+      let zone_id = null;
+      const zoneCode = (row.zone_code || '').trim();
+      if (zoneCode) {
+        const zoneRes = await pool.query('SELECT id FROM zones WHERE code = $1', [zoneCode]);
+        if (!zoneRes.rows[0]) {
+          skipped++;
+          errors.push(`Baris ${i + 2}: zona "${zoneCode}" tidak ditemukan`);
+          continue;
+        }
+        zone_id = zoneRes.rows[0].id;
+      }
+
+      const values = [
+        code,
+        zone_id,
+        (row.rack || '').trim() || null,
+        (row.level || '').trim() || null,
+        (row.bin || '').trim() || null,
+        (row.description || '').trim() || null,
+      ];
+
+      const existing = await pool.query('SELECT id FROM locations WHERE code = $1', [code]);
+      if (existing.rows[0]) {
+        await pool.query(
+          `UPDATE locations SET code=$1, zone_id=$2, rack=$3, level=$4, bin=$5, description=$6, is_active=true
+           WHERE id=$7`,
+          [...values, existing.rows[0].id]
+        );
+        updated++;
+      } else {
+        await pool.query(
+          `INSERT INTO locations (code, zone_id, rack, level, bin, description, is_active)
+           VALUES ($1,$2,$3,$4,$5,$6,true)`,
+          values
+        );
+        inserted++;
+      }
+    }
+
+    res.json({ total: rows.length, inserted, updated, skipped, errors });
+  } catch (err) {
+    next(err);
+  }
+});
 
 router.get('/', async (_req, res, next) => {
   try {

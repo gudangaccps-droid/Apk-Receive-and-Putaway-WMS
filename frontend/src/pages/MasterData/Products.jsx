@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../../api/client';
+import ImportCsvButton from '../../components/ImportCsvButton';
 
 export default function Products() {
   const [rows, setRows] = useState([]);
@@ -167,13 +168,20 @@ export default function Products() {
         </div>
       </form>
 
-      <input
-        type="text"
-        className="search-box"
-        placeholder="Cari barcode, SKU Code, atau nama produk..."
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-      />
+      <div className="toolbar">
+        <input
+          type="text"
+          className="search-box"
+          placeholder="Cari barcode, SKU Code, atau nama produk..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        <ImportCsvButton
+          endpoint="/products/import"
+          onDone={load}
+          templateHint="Kolom: barcode, sku_code, product_name, brand, category, group_code, uom, status"
+        />
+      </div>
 
       {error && <p className="error">{error}</p>}
 
