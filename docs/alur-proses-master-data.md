@@ -12,8 +12,8 @@ Validation
 Product Active
 ```
 
-Diimplementasikan sebagai **Import Excel** di halaman Master Product: admin mengunggah file
-berisi data produk dari supplier, tiap baris divalidasi (SKU Code & Nama Produk wajib
+Diimplementasikan sebagai **Import CSV** di halaman Master Product: admin mengunggah file
+berisi data produk dari supplier, tiap baris divalidasi (`sku_code` & `product_name` wajib
 ada), lalu produk yang lolos validasi disimpan dengan status `ACTIVE`. Produk dengan
 SKU Code yang sudah ada akan diperbarui (upsert), bukan diduplikasi.
 
@@ -29,10 +29,9 @@ Validation
 Location Active
 ```
 
-Diimplementasikan sebagai **Import Excel** di halaman Master Location: tiap baris
-divalidasi (Kode Lokasi wajib ada; Kode Zona jika diisi harus sudah terdaftar di
-Master Zona), lalu lokasi yang lolos validasi disimpan sebagai aktif (`is_active =
-true`). Lokasi dengan kode yang sudah ada akan diperbarui (upsert).
+Diimplementasikan sebagai **Import CSV** di halaman Master Location: tiap baris
+divalidasi (`location_code` wajib ada), lalu lokasi yang lolos validasi disimpan
+dengan status `ACTIVE`. Lokasi dengan kode yang sudah ada akan diperbarui (upsert).
 
 ## Cari Lokasi via Barcode Scanner
 

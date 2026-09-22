@@ -33,8 +33,51 @@ Modul ini terdiri dari:
 5. Master Parameter
 6. Master Stock
 
-> Status: field detail untuk Location, Supplier, dan Parameter menyusul.
-> Yang sudah dirinci dan diimplementasikan sejauh ini: **Master Product**, **Master User**, **Master Stock**.
+> Status: field detail untuk Supplier dan Parameter menyusul.
+> Yang sudah dirinci dan diimplementasikan sejauh ini: **Master Product**, **Master Location**, **Master User**, **Master Stock**.
+
+### Database
+
+Nama database: `wms_acc`.
+
+Skema `products`, `locations`, dan `stocks` mengikuti DDL resmi berikut (tipe & panjang kolom persis, termasuk `BIGSERIAL`/`BIGINT` untuk PK & FK):
+
+```sql
+CREATE DATABASE wms_acc;
+
+CREATE TABLE products (
+  id BIGSERIAL PRIMARY KEY,
+  barcode VARCHAR(50),
+  sku_code VARCHAR(50),
+  product_name TEXT,
+  brand VARCHAR(100),
+  category VARCHAR(100),
+  group_code VARCHAR(20),
+  uom VARCHAR(20),
+  status VARCHAR(20)
+);
+
+CREATE TABLE locations (
+  id BIGSERIAL PRIMARY KEY,
+  location_code VARCHAR(50),
+  area VARCHAR(10),
+  group_code VARCHAR(20),
+  rack VARCHAR(10),
+  shelf VARCHAR(10),
+  position VARCHAR(10),
+  status VARCHAR(20)
+);
+
+CREATE TABLE stocks (
+  id BIGSERIAL PRIMARY KEY,
+  product_id BIGINT,
+  location_id BIGINT,
+  qty INTEGER,
+  available_qty INTEGER
+);
+```
+
+Kolom di luar DDL ini (mis. `created_at`/`updated_at` untuk audit, `description` di `locations`) tetap dipertahankan di implementasi karena tidak bertentangan dengan spek — sama seperti field tambahan lain sejak Master Product.
 
 ---
 
@@ -52,15 +95,15 @@ Field:
 
 | Field | Type | Description |
 |---|---|---|
-| id | BIGINT | Primary Key |
-| barcode | VARCHAR | Barcode produk |
-| sku_code | VARCHAR | Kode SKU |
+| id | BIGSERIAL | Primary Key |
+| barcode | VARCHAR(50) | Barcode produk |
+| sku_code | VARCHAR(50) | Kode SKU |
 | product_name | TEXT | Nama produk |
-| brand | VARCHAR | Brand |
-| category | VARCHAR | Kategori |
-| group_code | VARCHAR | Kode lokasi |
-| uom | VARCHAR | Satuan |
-| status | VARCHAR | Status barang |
+| brand | VARCHAR(100) | Brand |
+| category | VARCHAR(100) | Kategori |
+| group_code | VARCHAR(20) | Kode group produk |
+| uom | VARCHAR(20) | Satuan |
+| status | VARCHAR(20) | Status barang |
 
 ### Contoh Data
 
@@ -74,7 +117,42 @@ UOM: `PCS`
 
 ---
 
-## 4. MASTER USER
+## 4. MASTER LOCATION
+
+### Fungsi
+
+Menyimpan seluruh informasi lokasi rak di gudang.
+
+### Database
+
+Table: `locations`
+
+Field:
+
+| Field | Type | Description |
+|---|---|---|
+| id | BIGSERIAL | Primary Key |
+| location_code | VARCHAR(50) | Kode lokasi |
+| area | VARCHAR(10) | Area gudang |
+| group_code | VARCHAR(20) | Kode group (mencocokkan `group_code` di Master Product untuk slotting) |
+| rack | VARCHAR(10) | Rak |
+| shelf | VARCHAR(10) | Shelf |
+| position | VARCHAR(10) | Position |
+| status | VARCHAR(20) | Status lokasi |
+
+### Contoh Data
+
+Location Code: `A-CHR-R01-B01-P01`
+
+Area: `A`
+
+Group: `CHR`
+
+Rack: `R01` · Shelf: `B01` · Position: `P01`
+
+---
+
+## 5. MASTER USER
 
 ### Fungsi
 
@@ -140,12 +218,13 @@ Table: `stocks`
 
 Field:
 
-| Field | Description |
-|---|---|
-| product_id | Produk |
-| location_id | Lokasi |
-| qty | Jumlah |
-| available_qty | Stok tersedia |
+| Field | Type | Description |
+|---|---|---|
+| id | BIGSERIAL | Primary Key |
+| product_id | BIGINT | Produk |
+| location_id | BIGINT | Lokasi |
+| qty | INTEGER | Jumlah |
+| available_qty | INTEGER | Stok tersedia |
 
 ### Contoh
 

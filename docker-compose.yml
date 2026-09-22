@@ -5,13 +5,13 @@ services:
     environment:
       POSTGRES_USER: wms_dev
       POSTGRES_PASSWORD: wms_dev_password
-      POSTGRES_DB: wms_gudang_acc
+      POSTGRES_DB: wms_acc
     ports:
       - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U wms_dev -d wms_gudang_acc"]
+      test: ["CMD-SHELL", "pg_isready -U wms_dev -d wms_acc"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -21,7 +21,7 @@ services:
     restart: unless-stopped
     environment:
       PORT: 4000
-      DATABASE_URL: postgresql://wms_dev:wms_dev_password@db:5432/wms_gudang_acc
+      DATABASE_URL: postgresql://wms_dev:wms_dev_password@db:5432/wms_acc
     ports:
       - "4000:4000"
     depends_on:

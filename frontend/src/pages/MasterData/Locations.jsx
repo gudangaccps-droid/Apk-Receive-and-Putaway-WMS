@@ -5,7 +5,7 @@ import ImportCsvButton from '../../components/ImportCsvButton';
 export default function Locations() {
   const [rows, setRows] = useState([]);
   const [zones, setZones] = useState([]);
-  const [form, setForm] = useState({});
+  const [form, setForm] = useState({ status: 'ACTIVE' });
   const [editingId, setEditingId] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
@@ -24,7 +24,7 @@ export default function Locations() {
   useEffect(load, []);
 
   const resetForm = () => {
-    setForm({});
+    setForm({ status: 'ACTIVE' });
     setEditingId(null);
   };
 
@@ -47,12 +47,14 @@ export default function Locations() {
   const edit = (row) => {
     setEditingId(row.id);
     setForm({
-      code: row.code || '',
-      zone_id: row.zone_id || '',
+      location_code: row.location_code || '',
+      area: row.area || '',
+      group_code: row.group_code || '',
       rack: row.rack || '',
-      level: row.level || '',
-      bin: row.bin || '',
+      shelf: row.shelf || '',
+      position: row.position || '',
       description: row.description || '',
+      status: row.status || 'ACTIVE',
     });
   };
 
@@ -68,44 +70,73 @@ export default function Locations() {
 
   return (
     <div className="page">
-      <h1>Lokasi Rak</h1>
+      <h1>Master Location</h1>
 
       <form className="form-row" onSubmit={submit}>
         <div className="field">
           <label>Kode Lokasi</label>
           <input
             type="text"
-            placeholder="mis. G2-F2-S03"
+            placeholder="mis. A-CHR-R01-B01-P01"
             required
-            value={form.code ?? ''}
-            onChange={(e) => setForm({ ...form, code: e.target.value })}
+            value={form.location_code ?? ''}
+            onChange={(e) => setForm({ ...form, location_code: e.target.value })}
           />
         </div>
         <div className="field">
-          <label>Zona</label>
-          <select
-            value={form.zone_id ?? ''}
-            onChange={(e) => setForm({ ...form, zone_id: e.target.value })}
-          >
-            <option value="">- pilih zona -</option>
+          <label>Area</label>
+          <input
+            type="text"
+            list="area-options"
+            placeholder="mis. A"
+            value={form.area ?? ''}
+            onChange={(e) => setForm({ ...form, area: e.target.value })}
+          />
+          <datalist id="area-options">
             {zones.map((z) => (
-              <option key={z.id} value={z.id}>
-                {z.code} · {z.name}
-              </option>
+              <option key={z.id} value={z.code} />
             ))}
-          </select>
+          </datalist>
         </div>
         <div className="field">
-          <label>Rak</label>
+          <label>Kode Group</label>
+          <input
+            type="text"
+            placeholder="mis. CHR"
+            value={form.group_code ?? ''}
+            onChange={(e) => setForm({ ...form, group_code: e.target.value })}
+          />
+        </div>
+        <div className="field">
+          <label>Rack</label>
           <input type="text" value={form.rack ?? ''} onChange={(e) => setForm({ ...form, rack: e.target.value })} />
         </div>
         <div className="field">
-          <label>Level</label>
-          <input type="text" value={form.level ?? ''} onChange={(e) => setForm({ ...form, level: e.target.value })} />
+          <label>Shelf</label>
+          <input type="text" value={form.shelf ?? ''} onChange={(e) => setForm({ ...form, shelf: e.target.value })} />
         </div>
         <div className="field">
-          <label>Bin</label>
-          <input type="text" value={form.bin ?? ''} onChange={(e) => setForm({ ...form, bin: e.target.value })} />
+          <label>Position</label>
+          <input
+            type="text"
+            value={form.position ?? ''}
+            onChange={(e) => setForm({ ...form, position: e.target.value })}
+          />
+        </div>
+        <div className="field">
+          <label>Status</label>
+          <select value={form.status ?? 'ACTIVE'} onChange={(e) => setForm({ ...form, status: e.target.value })}>
+            <option value="ACTIVE">ACTIVE</option>
+            <option value="INACTIVE">INACTIVE</option>
+          </select>
+        </div>
+        <div className="field span2">
+          <label>Deskripsi</label>
+          <input
+            type="text"
+            value={form.description ?? ''}
+            onChange={(e) => setForm({ ...form, description: e.target.value })}
+          />
         </div>
         <div className="field field-actions">
           <button type="submit">{editingId ? 'Simpan Perubahan' : 'Tambah'}</button>
@@ -121,7 +152,7 @@ export default function Locations() {
         <ImportCsvButton
           endpoint="/locations/import"
           onDone={load}
-          templateHint="Kolom: code, zone_code, rack, level, bin, description"
+          templateHint="Kolom: location_code, area, group_code, rack, shelf, position, description"
         />
       </div>
 
@@ -135,22 +166,26 @@ export default function Locations() {
         <table>
           <thead>
             <tr>
-              <th>Kode</th>
-              <th>Zona</th>
-              <th>Rak</th>
-              <th>Level</th>
-              <th>Bin</th>
+              <th>Kode Lokasi</th>
+              <th>Area</th>
+              <th>Group</th>
+              <th>Rack</th>
+              <th>Shelf</th>
+              <th>Position</th>
+              <th>Status</th>
               <th></th>
             </tr>
           </thead>
           <tbody>
             {rows.map((row) => (
               <tr key={row.id}>
-                <td>{row.code}</td>
-                <td>{row.zone_code ? `${row.zone_code} · ${row.zone_name}` : '-'}</td>
+                <td className="mono">{row.location_code}</td>
+                <td>{row.area || '-'}</td>
+                <td>{row.group_code || '-'}</td>
                 <td>{row.rack || '-'}</td>
-                <td>{row.level || '-'}</td>
-                <td>{row.bin || '-'}</td>
+                <td>{row.shelf || '-'}</td>
+                <td>{row.position || '-'}</td>
+                <td>{row.status}</td>
                 <td className="row-actions">
                   <button onClick={() => edit(row)}>Edit</button>
                   <button className="danger" onClick={() => remove(row.id)}>

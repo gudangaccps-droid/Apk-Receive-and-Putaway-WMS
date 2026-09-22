@@ -46,6 +46,9 @@ app.use((err, _req, res, _next) => {
   if (err instanceof multer.MulterError || err.message === 'Hanya file .csv yang didukung') {
     return res.status(400).json({ error: err.message });
   }
+  if (err.code === '22001') {
+    return res.status(400).json({ error: 'Salah satu isian melebihi panjang maksimum kolomnya' });
+  }
   console.error(err);
   res.status(500).json({ error: 'Terjadi kesalahan pada server' });
 });
