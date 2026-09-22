@@ -8,6 +8,7 @@ import Products from './Products';
 import Stocks from './Stocks';
 import MasterUser from './MasterUser';
 import MasterParameter from './MasterParameter';
+import LocationFinder from './LocationFinder';
 
 const TABS = [
   { path: '/master-data/products', label: 'Master Product' },
@@ -16,6 +17,7 @@ const TABS = [
   { path: '/master-data/users', label: 'Master User' },
   { path: '/master-data/parameters', label: 'Master Parameter' },
   { path: '/master-data/stocks', label: 'Master Stock' },
+  { path: '/master-data/find-location', label: 'Cari Lokasi' },
   { path: '/master-data/categories', label: 'Kategori' },
   { path: '/master-data/units', label: 'Satuan' },
   { path: '/master-data/zones', label: 'Zona' },
@@ -39,6 +41,7 @@ export default function MasterData() {
         <Route path="users" element={<MasterUser />} />
         <Route path="parameters" element={<MasterParameter />} />
         <Route path="stocks" element={<Stocks />} />
+        <Route path="find-location" element={<LocationFinder />} />
         <Route path="categories" element={<Categories />} />
         <Route path="units" element={<Units />} />
         <Route path="zones" element={<Zones />} />

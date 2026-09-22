@@ -42,7 +42,7 @@ Skema database untuk Modul 2-5 sudah disiapkan di `backend/db/migrations/001_ini
 
 Rincian spesifikasi Modul 1 mengikuti [Blueprint Modul 1 - Master Data](docs/blueprint-modul-1-master-data.md), yang terdiri dari 6 bagian: Master Product, Master Location, Master Supplier, Master User, Master Parameter, Master Stock. Yang field-nya sudah dirinci dan diimplementasikan penuh: **Master Product**, **Master User**, **Master Stock**. Master Parameter masih placeholder menunggu spesifikasi field.
 
-Relasi antar tabel didokumentasikan di [ERD WMS Gudang ACC](docs/erd-wms-gudang-acc.md).
+Relasi antar tabel didokumentasikan di [ERD WMS Gudang ACC](docs/erd-wms-gudang-acc.md), dan alur proses Master Data (input produk/lokasi baru, cari lokasi via barcode) di [Master Data Flow](docs/alur-proses-master-data.md).
 
 ## Struktur Proyek
 
@@ -115,6 +115,8 @@ Sudah bisa dipakai untuk mengelola:
 - **Master Supplier**
 - **Master User** — username, nama lengkap, role (ADMIN/SPV_GUDANG/STAFF_GUDANG/PICKER/QC), status; tabel menampilkan hak akses per role sebagai referensi
 - **Master Stock** — menghubungkan produk + lokasi + jumlah (qty & qty tersedia)
+- **Import CSV** — di Master Product & Master Location, untuk input data massal dari supplier/spreadsheet (upsert berdasarkan SKU Code / Kode Lokasi, dengan validasi & ringkasan hasil)
+- **Cari Lokasi** — cari produk lewat scan barcode atau ketik SKU Code, menampilkan semua lokasi rak & jumlah stoknya (cocok untuk barcode scanner handheld yang bertindak sebagai keyboard)
 - **Kategori** & **Satuan (UOM)** — daftar pilihan pendukung untuk form Master Product
 - **Zona Gudang** — mis. HIJAU, MERAH, NEW, HOLD
 

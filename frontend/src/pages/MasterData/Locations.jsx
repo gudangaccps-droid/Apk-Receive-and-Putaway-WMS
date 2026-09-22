@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../../api/client';
+import ImportCsvButton from '../../components/ImportCsvButton';
 
 export default function Locations() {
   const [rows, setRows] = useState([]);
@@ -115,6 +116,14 @@ export default function Locations() {
           )}
         </div>
       </form>
+
+      <div className="toolbar">
+        <ImportCsvButton
+          endpoint="/locations/import"
+          onDone={load}
+          templateHint="Kolom: code, zone_code, rack, level, bin, description"
+        />
+      </div>
 
       {error && <p className="error">{error}</p>}
 
