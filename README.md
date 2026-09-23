@@ -54,7 +54,17 @@ docker-compose.yml   Menjalankan database + backend + frontend sekaligus
 
 ## Menjalankan secara lokal
 
-### Opsi 1 — Docker Compose (disarankan)
+### Opsi termudah — Windows, tanpa Docker & tanpa install PostgreSQL
+
+Cukup butuh [Node.js](https://nodejs.org) (versi LTS). Klik dua kali **`JALANKAN-WMS.bat`** — file ini otomatis menginstal kebutuhan (hanya sekali di awal), menyiapkan database, menyalakan server, lalu membuka http://localhost:4000 di browser. Tutup jendela hitamnya untuk menghentikan server.
+
+Database-nya memakai database lokal bawaan ([PGlite](https://pglite.dev) — PostgreSQL yang berjalan di dalam Node.js), tersimpan di folder `backend/data/`. Data tetap ada walau server dimatikan. Untuk backup, salin folder itu saat server mati.
+
+Komputer/HP lain di jaringan WiFi yang sama bisa ikut membuka aplikasinya lewat alamat IP yang tampil di jendela server (mis. `http://192.168.1.10:4000`).
+
+(Database lokal bawaan ini otomatis dipakai setiap kali server dijalankan tanpa `DATABASE_URL`. Kalau `DATABASE_URL` di-set, server memakai PostgreSQL itu seperti biasa.)
+
+### Opsi 1 — Docker Compose
 
 ```bash
 docker compose up --build

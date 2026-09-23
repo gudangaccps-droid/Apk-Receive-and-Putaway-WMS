@@ -2,6 +2,9 @@ node_modules/
 dist/
 .env
 
+# Database lokal bawaan (PGlite) saat dijalankan tanpa DATABASE_URL
+backend/data/
+
 # Data runtime aplikasi lama (tidak dipakai lagi, dibiarkan untuk jaga-jaga)
 data.json
 backup/
