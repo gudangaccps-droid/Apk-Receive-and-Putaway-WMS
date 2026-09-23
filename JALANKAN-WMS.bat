@@ -2,16 +2,15 @@
 title WMS Gudang ACC
 cd /d "%~dp0"
 
+rem Node.js portable milik aplikasi ini (tools\node) diutamakan kalau ada.
+set "PATH=%~dp0tools\node;%PATH%"
+
 where node >nul 2>nul
 if errorlevel 1 (
-  echo.
-  echo  Node.js belum terpasang di komputer ini.
-  echo  Unduh dan pasang dulu dari https://nodejs.org - pilih versi LTS,
-  echo  lalu jalankan file ini lagi.
-  echo.
-  pause
-  exit /b 1
+  echo Node.js belum terpasang. Mengunduh otomatis dari nodejs.org - hanya sekali di awal...
+  powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\install-node.ps1" || goto gagal
 )
+where node >nul 2>nul || goto gagal
 
 if not exist "backend\node_modules" (
   echo Menginstal kebutuhan backend - hanya sekali di awal, mohon tunggu...

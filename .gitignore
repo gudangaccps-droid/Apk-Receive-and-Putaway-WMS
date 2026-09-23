@@ -8,3 +8,4 @@ backend/data/
 # Data runtime aplikasi lama (tidak dipakai lagi, dibiarkan untuk jaga-jaga)
 data.json
 backup/
+tools/
