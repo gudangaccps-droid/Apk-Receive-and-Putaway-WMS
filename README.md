@@ -56,7 +56,9 @@ docker-compose.yml   Menjalankan database + backend + frontend sekaligus
 
 ### Opsi termudah — Windows, tanpa Docker & tanpa install PostgreSQL
 
-Cukup butuh [Node.js](https://nodejs.org) (versi LTS). Klik dua kali **`JALANKAN-WMS.bat`** — file ini otomatis menginstal kebutuhan (hanya sekali di awal), menyiapkan database, menyalakan server, lalu membuka http://localhost:4000 di browser. Tutup jendela hitamnya untuk menghentikan server.
+Klik dua kali **`JALANKAN-WMS.bat`** — file ini otomatis menginstal kebutuhan (hanya sekali di awal, butuh internet), menyiapkan database, menyalakan server, lalu membuka http://localhost:4000 di browser. Tutup jendela hitamnya untuk menghentikan server.
+
+Kalau Node.js belum terpasang di komputer, `JALANKAN-WMS.bat` mengunduh sendiri Node.js LTS versi portable dari nodejs.org (dicek dengan checksum resminya) ke folder `tools/node` di dalam aplikasi — tanpa hak admin dan tanpa mengubah pengaturan Windows (lihat `scripts/install-node.ps1`).
 
 Database-nya memakai database lokal bawaan ([PGlite](https://pglite.dev) — PostgreSQL yang berjalan di dalam Node.js), tersimpan di folder `backend/data/`. Data tetap ada walau server dimatikan. Untuk backup, salin folder itu saat server mati.
 
